@@ -1,0 +1,97 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Java CI workflow
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1, 2024-04-04
+      
+    - name: Set up JDK
+      uses: actions/setup-java@2dfa2011c5b2a0f1489bf9e433881c92c1631f88 # v4.3.0, 2024-09-24
+      with:
+        java-version: "21"
+        distribution: "temurin"
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@0a849a6e5c7b7e5b5b5b5b5b5b5b5b5b5b5b5b5b # v4.0.2, 2024-09-23
+      with:
+        path: ~/.m2/repository
+        key: maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: maven-${{ runner.os }}-
+        
+    - name: Run tests
+      run: ./mvnw test
+
+  # Docker testing
+  docker-test:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1, 2024-04-04
+      
+    - name: Build Docker image
+      run: docker build -t aiprojekt-backend:test .
+      
+    - name: Test Docker container
+      run: |
+        # Start container in background
+        docker run -d --name test-container -p 8080:8080 aiprojekt-backend:test
+        # Wait for application to start
+        sleep 30
+        # Test that application responds (using Spring Boot Actuator health endpoint)
+        curl -f http://localhost:8080/actuator/health || exit 1
+        # Clean up
+        docker stop test-container
+        docker rm test-container
+
+  # CD workflow
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: [test, docker-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1, 2024-04-04
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+          
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
