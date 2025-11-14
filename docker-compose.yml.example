@@ -9,6 +9,8 @@ services:
     env_file:
       - .env
     environment:
+      # Spring Profile (dev uses H2 in-memory database)
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
       
       # OpenRouter Configuration (loaded from .env file)
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
