@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  aiprojekt-backend:
+    image: ghcr.io/tobiasdosdal/aiprojektbackend:latest
+    container_name: aiprojekt-backend
+    ports:
+      - "8080:8080"
+    environment:
+
+      # OpenRouter Configuration (required)
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-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}
+      - OPENROUTER_API_URL=${OPENROUTER_API_URL:-https://openrouter.ai/api/v1/chat/completions}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openai/gpt-oss-safeguard-20b}
+      
+      # Database Configuration (for dev profile - H2 in-memory)
+      - DATASOURCE_URL=${DATASOURCE_URL:-jdbc:h2:mem:chatdb}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME:-sa}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD:-password}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
