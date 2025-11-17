@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <h3>AI Chat</h3>
+                <span id="sessionId"></span>
+            </div>
+            <div class="header-right">
+                <button id="clearButton" class="header-button" aria-label="Clear conversation">Clear</button>
+                <button id="exportButton" class="header-button" aria-label="Export conversation">Export</button>
+            </div>
+        </div>
+        <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
+        <div class="input-area">
+            <div class="input-container">
+                <textarea id="messageInput" placeholder="Type a message..." rows="1" maxlength="2000" aria-label="Message input"></textarea>
+                <div class="input-footer">
+                    <div class="character-count">
+                        <span id="charCount">0</span>/2000
+                    </div>
+                    <div class="input-buttons">
+                        <button id="sendButton" aria-label="Send message">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 
+    API URL Configuration:
+    This will be set by docker-compose environment variable API_BASE_URL
+    For Docker Compose: Uses http://localhost:8080/api (browser accesses exposed port)
+    For production: Can be overridden via environment variable
+    -->
+    <script>
+        // Set API_BASE_URL from environment (injected by docker-compose or server)
+        // This will be used by api.js module
+        // Default fallback is handled in api.js
+        if (typeof window !== 'undefined') {
+            // Can be set via server-side injection or docker-compose env
+            // For now, api.js will handle the detection automatically
+            // To override, uncomment and set:
+            // window.API_BASE_URL = 'http://localhost:8080/api';
+        }
+    </script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
