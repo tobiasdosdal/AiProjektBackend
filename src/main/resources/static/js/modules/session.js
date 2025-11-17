@@ -1,5 +1,4 @@
-// Session Modul - Håndterer brugersessioner
-
+// Session Modul
 import { copyToClipboard } from './ui.js';
 
 // Generer unikt session ID
@@ -36,7 +35,7 @@ async function createNewSession() {
     showNotification('Ny session oprettet');
 }
 
-// Opret session manager brugerfladen
+// Opret session manager
 function createSessionManager() {
     const headerRight = document.querySelector('.header-right');
     const sessionDropdown = document.createElement('div');
@@ -52,7 +51,6 @@ function createSessionManager() {
     sessionMenu.className = 'session-menu';
     sessionMenu.id = 'sessionMenu';
     
-    // Menupunkter
     const menuItems = [
         { text: 'Ny Session', action: () => { createNewSession(); toggleSessionMenu(); } },
         { text: 'Kopier Session ID', action: () => { copyToClipboard(getSessionId()); toggleSessionMenu(); } }
@@ -72,7 +70,6 @@ function createSessionManager() {
     
     sessionButton.addEventListener('click', toggleSessionMenu);
     
-    // Luk menu når der klikkes udenfor
     document.addEventListener('click', e => {
         if (!sessionDropdown.contains(e.target)) sessionMenu.style.display = 'none';
     });
@@ -84,7 +81,6 @@ function toggleSessionMenu() {
     sessionMenu.style.display = sessionMenu.style.display === 'block' ? 'none' : 'block';
 }
 
-// Eksporter funktioner til brug i andre moduler
 export {
     generateSessionId,
     getSessionId,

@@ -1,13 +1,12 @@
 // Markdown Parser Modul
 
-// Markdown parsing funktion
 function parseMarkdown(text) {
     let html = text;
     
-    // Blokcitater (>)
+    // Blokcitater
     html = html.replace(/^> (.+)$/gim, '<blockquote>$1</blockquote>');
     
-    // Kodeblokke (triple backticks) - før inline kode
+    // Kodeblokke
     html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
     
     // Overskrifter
@@ -19,7 +18,7 @@ function parseMarkdown(text) {
     // Vandrette linjer
     html = html.replace(/^(---|\*\*\*)$/gim, '<hr>');
     
-    // Links [tekst](url)
+    // Links
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
     
     // Fed tekst
@@ -39,7 +38,7 @@ function parseMarkdown(text) {
     let inOrderedList = false;
     let result = [];
     
-    lines.forEach((line, i) => {
+    lines.forEach(line => {
         const trimmed = line.trim();
         const isUnordered = /^[-*] (.+)$/.test(trimmed);
         const isOrdered = /^\d+\. (.+)$/.test(trimmed);
@@ -54,14 +53,12 @@ function parseMarkdown(text) {
                 inOrderedList = true;
             }
             if (inUnorderedList && isOrdered) {
-                result.push('</ul>');
-                result.push('<ol>');
+                result.push('</ul><ol>');
                 inUnorderedList = false;
                 inOrderedList = true;
             }
             if (inOrderedList && isUnordered) {
-                result.push('</ol>');
-                result.push('<ul>');
+                result.push('</ol><ul>');
                 inOrderedList = false;
                 inUnorderedList = true;
             }
@@ -81,7 +78,6 @@ function parseMarkdown(text) {
         }
     });
     
-    // Luk åbne lister
     if (inUnorderedList) result.push('</ul>');
     if (inOrderedList) result.push('</ol>');
     
@@ -99,7 +95,4 @@ function parseMarkdown(text) {
     return html;
 }
 
-// Eksporter funktioner til brug i andre moduler
-export {
-    parseMarkdown
-};
+export { parseMarkdown };

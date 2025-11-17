@@ -1,6 +1,4 @@
 // Hovedapplikation Modul
-// Dette er hovedfilen der styrer hele chat appen
-
 import { sendMessage, getHistory } from './modules/api.js';
 import { getSessionId, displaySessionId, createSessionManager } from './modules/session.js';
 import { 
@@ -9,57 +7,35 @@ import {
 } from './modules/ui.js';
 import { addMessage, updateMessageStatus } from './modules/messages.js';
 
-// Funktionen der køres når brugeren sender en besked
+// Håndter afsendelse af besked
 async function handleSendMessage() {
-    // Få input felterne
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
-    
-    // Få teksten brugeren skrev
     const message = messageInput.value.trim();
     
-    // Hvis der ikke er noget tekst, stop her
     if (!message) return;
     
-    // Deaktivér input og knap mens vi sender
     messageInput.disabled = true;
     sendButton.disabled = true;
     
-    // Tilføj brugerens besked til chatten
     const messageElements = addMessage(message, true, 'sending');
-    
-    // Tøm input feltet
     messageInput.value = '';
-    
-    // Vis at AI er ved at skrive
     showTypingIndicator();
     
     try {
-        // Send beskeden til serveren
         const response = await sendMessage(message, getSessionId());
-        
-        // Opdater status fra "sendes" til "sendt"
         updateMessageStatus(messageElements, 'sent');
-        
-        // Fjern skriveindikatoren
         removeTypingIndicator();
         
-        // Tjek om vi fik et svar tilbage
         if (response && response.response) {
-            // Tilføj AI's svar til chatten (vis øjeblikkeligt)
             addMessage(response.response, false);
         } else {
-            // Hvis vi ikke får et ordentligt svar, vis fejl
             showError('Ugyldigt svar fra serveren.');
         }
     } catch (error) {
-        // Hvis der var en fejl, opdater status til "fejlet"
         updateMessageStatus(messageElements, 'failed');
-        
-        // Fjern skriveindikatoren
         removeTypingIndicator();
         
-        // Bestem fejlbesked baseret på fejltypen
         let errorMessage = 'Fejl ved afsendelse. Prøv igen senere.';
         
         if (error.message.includes('Network error')) {
@@ -74,15 +50,11 @@ async function handleSendMessage() {
             errorMessage = 'Serverfejl. Prøv igen senere.';
         }
         
-        // Vis fejlbesked
         showError(errorMessage);
         console.error('Fejl ved sending:', error);
     } finally {
-        // Reaktivér input og knap
         messageInput.disabled = false;
         sendButton.disabled = false;
-        
-        // Fokus tilbage på input feltet
         messageInput.focus();
     }
 }
@@ -110,51 +82,35 @@ function exportConversation() {
     showNotification('Samtale eksporteret');
 }
 
-// Initialiser (start) chat brugerfladen
+// Initialiser chat
 async function initializeChat() {
-    // Vis session ID
     displaySessionId();
-    
-    // Opret session dropdown menu
     createSessionManager();
     
-    // Hent og vis tidligere beskeder
     const sessionId = getSessionId();
     const history = await getHistory(sessionId);
     
-    // Viser hver tidligere besked
     history.forEach(msg => {
-        if (msg.isUser) {
-            addMessage(msg.content, true);
-        } else {
-            addMessage(msg.content, false);
-        }
+        addMessage(msg.content, msg.isUser);
     });
     
-    // Hent alle knapperne og input felterne
     const sendButton = document.getElementById('sendButton');
     const messageInput = document.getElementById('messageInput');
     const clearButton = document.getElementById('clearButton');
     const exportButton = document.getElementById('exportButton');
     
-    // Tilføj event listeners til alle knapperne
     sendButton.addEventListener('click', handleSendMessage);
     clearButton.addEventListener('click', clearConversation);
     exportButton.addEventListener('click', exportConversation);
     
-    // Update karakterantal og textarea størrelse når man skriver
     messageInput.addEventListener('input', () => {
         updateCharacterCount();
         autoResizeTextarea();
     });
     
-    // Initialiser tegntæller og textarea høj første gang
     updateCharacterCount();
     autoResizeTextarea();
-    
-    // Fokus på input feltet så brugeren kan skrive med det samme
     messageInput.focus();
 }
 
-// Initialiser chat når DOM er indlæst
 document.addEventListener('DOMContentLoaded', initializeChat);

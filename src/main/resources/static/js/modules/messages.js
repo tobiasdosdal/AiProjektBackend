@@ -1,52 +1,28 @@
 // Beskedadministration Modul
-// Her håndteres alle beskeder - tilføjelse, visning, streaming osv.
-
 import { parseMarkdown } from './markdown.js';
 import { copyToClipboard } from './ui.js';
 
-// Formatér tidsstempel på en pæn måde
+// Formatér tidsstempel
 function formatTimestamp(date) {
-    // Beregn hvor mange minutter siden
     const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
+    const diffMins = Math.floor((now - date) / 60000);
     
-    // Vise "lige nu" hvis mindre end 1 minut
-    if (diffMins < 1) {
-        return 'Lige nu';
-    } 
-    // Vise minutter hvis mindre end 1 time
-    else if (diffMins < 60) {
-        return `${diffMins} min siden`;
-    } 
-    // Vise timer hvis mindre end 24 timer
-    else if (diffMins < 1440) {
+    if (diffMins < 1) return 'Lige nu';
+    if (diffMins < 60) return `${diffMins} min siden`;
+    if (diffMins < 1440) {
         const hours = Math.floor(diffMins / 60);
-        if (hours === 1) {
-            return '1 time siden';
-        } else {
-            return `${hours} timer siden`;
-        }
-    } 
-    // Vise dato og tid for gamle beskeder
-    else {
-        const dateStr = date.toLocaleDateString();
-        const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        return dateStr + ' ' + timeStr;
+        return hours === 1 ? '1 time siden' : `${hours} timer siden`;
     }
+    
+    const dateStr = date.toLocaleDateString();
+    const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    return `${dateStr} ${timeStr}`;
 }
 
-// Få det rigtige ikon for statusen på en besked
+// Status ikon for besked
 function getStatusIcon(status) {
-    if (status === 'sending') {
-        return '...'; // Sendes
-    } else if (status === 'sent') {
-        return 'OK'; // Sendt
-    } else if (status === 'failed') {
-        return 'X'; // Fejlede
-    } else {
-        return '';
-    }
+    const icons = { sending: '...', sent: 'OK', failed: 'X' };
+    return icons[status] || '';
 }
 
 // Opdater beskedstatus
@@ -71,7 +47,6 @@ function addMessage(content, isUser, status = 'sent') {
     timestamp.className = 'message-timestamp';
     timestamp.textContent = formatTimestamp(new Date());
     
-    // Opret kopieringsknappe
     const copyButton = document.createElement('button');
     copyButton.className = 'copy-button';
     copyButton.textContent = 'Copy';
@@ -96,9 +71,4 @@ function addMessage(content, isUser, status = 'sent') {
     return { container: messageContainer, message: messageDiv, status: statusIndicator, timestamp };
 }
 
-
-// Eksporter funktioner til brug i andre moduler
-export {
-    updateMessageStatus,
-    addMessage
-};
+export { updateMessageStatus, addMessage };

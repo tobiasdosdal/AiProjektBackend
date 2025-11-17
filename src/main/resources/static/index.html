@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,23 +33,7 @@
             </div>
         </div>
     </div>
-    <!-- 
-    API URL Configuration:
-    This will be set by docker-compose environment variable API_BASE_URL
-    For Docker Compose: Uses http://localhost:8080/api (browser accesses exposed port)
-    For production: Can be overridden via environment variable
-    -->
-    <script>
-        // Set API_BASE_URL from environment (injected by docker-compose or server)
-        // This will be used by api.js module
-        // Default fallback is handled in api.js
-        if (typeof window !== 'undefined') {
-            // Can be set via server-side injection or docker-compose env
-            // For now, api.js will handle the detection automatically
-            // To override, uncomment and set:
-            // window.API_BASE_URL = 'http://localhost:8080/api';
-        }
-    </script>
+    <!-- API URL konfigureres automatisk i api.js -->
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

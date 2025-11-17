@@ -1,13 +1,10 @@
 // UI Utilities Modul
-// Her er funktioner for at vise ting på skærmen
 
 // Kopier tekst til clipboard
 async function copyToClipboard(text) {
     try {
-        // Prøv at bruge moderne clipboard API
         await navigator.clipboard.writeText(text);
     } catch (err) {
-        // Hvis det ikke virker, brug den gamle måde
         const textArea = document.createElement('textarea');
         textArea.value = text;
         document.body.appendChild(textArea);
@@ -18,26 +15,18 @@ async function copyToClipboard(text) {
     showNotification('Besked kopieret');
 }
 
-// Vis en notifikation på skærmen
+// Vis notifikation
 function showNotification(message, duration = 3000) {
-    // Opret en ny div for notifikationen
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.textContent = message;
     
-    // Tilføj den til siden
     document.body.appendChild(notification);
     
-    // Lidt senere, gøre den synlig (fade in)
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 10);
+    setTimeout(() => notification.classList.add('show'), 10);
     
-    // Efter duration milliskunder, gør den usynlig (fade out)
     setTimeout(() => {
         notification.classList.remove('show');
-        
-        // Vent til fade out animation er færdig, så fjern den fra siden
         setTimeout(() => {
             if (notification.parentNode) {
                 document.body.removeChild(notification);
@@ -85,28 +74,23 @@ function autoResizeTextarea() {
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
 }
 
-// Opdater tegntæller under beskedindtastning
+// Opdater tegntæller
 function updateCharacterCount() {
     const messageInput = document.getElementById('messageInput');
     const charCount = document.getElementById('charCount');
-    
-    // Få længden af teksten
     const currentLength = messageInput.value.length;
     
-    // Opdater tallet
     charCount.textContent = currentLength;
     
-    // Skift farve baseret på hvor tæt vi er på grænsen
     if (currentLength > 1800) {
-        charCount.style.color = '#ff3b30'; // Rød - meget nær grænse!
+        charCount.style.color = '#ff3b30';
     } else if (currentLength > 1500) {
-        charCount.style.color = '#ff9f0a'; // Orange - nærmere os
+        charCount.style.color = '#ff9f0a';
     } else {
-        charCount.style.color = '#86868b'; // Grå - alt er OK
+        charCount.style.color = '#86868b';
     }
 }
 
-// Eksporter funktioner til brug i andre moduler
 export {
     copyToClipboard,
     showNotification,
