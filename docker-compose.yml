@@ -26,3 +26,19 @@ services:
       retries: 3
       start_period: 60s
     restart: unless-stopped
+
+  aiprojekt-frontend:
+    image: ghcr.io/tobiasdosdal/aiprojektfrontend:latest
+    container_name: aiprojekt-frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Backend API URL for plain JavaScript frontend
+      # Browser will use localhost:8080 (exposed port)
+      # Container can use service name for internal calls if needed
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:8080/api}
+    depends_on:
+      - aiprojekt-backend
+    restart: unless-stopped
